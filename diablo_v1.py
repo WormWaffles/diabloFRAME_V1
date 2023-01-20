@@ -23,7 +23,7 @@ def display():
 
         cv2.imshow("Slideshow", img)
 
-        if cv2.waitKey(5000) == ord('q'):
+        if cv2.waitKey(3000) == ord('q'):
             return
 
 check_folder()

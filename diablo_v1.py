@@ -1,7 +1,7 @@
 import os
 import cv2 as cv
 import glob
-#import random
+import random
 
 def check_folder():
     print('Looking for folder...')
@@ -18,9 +18,10 @@ def display():
     print(filenames)
 
     cv.namedWindow("window", cv.WINDOW_NORMAL)
-    cv.setWindowProperty("window", cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN)
+    #cv.setWindowProperty("window", cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN)
+    cv.setWindowProperty("window", cv.WND_PROP_ASPECT_RATIO, cv.WINDOW_KEEPRATIO)
 
-
+    random.shuffle(filenames)
     for filename in filenames:
         print(filename)
         img = cv.imread(filename)

@@ -1,7 +1,7 @@
 import os
-import cv2
+import cv2 as cv
 import glob
-import random
+#import random
 
 def check_folder():
     print('Looking for folder...')
@@ -17,13 +17,17 @@ def display():
     filenames = glob.glob(os.path.join(path, "*"))
     print(filenames)
 
+    cv.namedWindow("window", cv.WINDOW_NORMAL)
+    cv.setWindowProperty("window", cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN)
+
+
     for filename in filenames:
         print(filename)
-        img = cv2.imread(filename)
+        img = cv.imread(filename)
 
-        cv2.imshow("Slideshow", img)
+        cv.imshow("window", img)
 
-        if cv2.waitKey(3000) == ord('q'):
+        if cv.waitKey(1000) == ord('q'):
             return
 
 check_folder()

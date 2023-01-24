@@ -16,15 +16,44 @@ def check_folder():
 def play_video(file):
     cap = cv.VideoCapture(file)
 
+    # background
+    bg_made = False
+
     while cap.isOpened():
         ret, frame = cap.read() # If frame is read, ret is true
+
+        if not bg_made:
+            blur_frame = cv.blur(frame, (frame.shape[0]//10, frame.shape[1]//10))
+            width, height = blur_frame.shape[1], blur_frame.shape[0]
+            width = int(width * 220 // 100)
+            height = int(height * 220 // 100)
+            dim = width, height
+            blur_frame = cv.resize(blur_frame, dim, interpolation = cv.INTER_AREA)
+            crop_width, crop_height = image_to_ratio(width, height)
+            blur_frame = blur_frame[0:crop_height, 0:crop_width]
+            bg_made = True
 
         if not ret:
             print('Error: did not receive frame. Exiting...')
             break
+
+        # Resize frame to fit properly in bg
+        # Resize original to fit in new
+        img_width, img_height = frame.shape[1], frame.shape[0]
+        if img_width // 9 > img_height // 16:
+            img_width = int(img_width * (blur_frame.shape[0] / img_height))
+            img_height = blur_frame.shape[0]
+        elif img_height // 16 > img_width // 9:
+            img_height = int(img_height * (blur_frame.shape[1] / img_width))
+            img_width = blur_frame.shape[1]
+
+        frame = cv.resize(frame, (img_width, img_height), interpolation = cv.INTER_AREA)
+
+        frame = merge_image(blur_frame, frame, ((crop_width // 2) - (frame.shape[1] // 2)), ((crop_height // 2) - (frame.shape[0] // 2)))
         cv.imshow('window', frame)
         if cv.waitKey(1) == ord('q'):
             break
+
     return
 
 def display_img(file):
@@ -47,7 +76,6 @@ def display_img(file):
 
     # Resize original to fit in new
     img_width, img_height = img.shape[1], img.shape[0]
-
     if img_width // 9 > img_height // 16:
         img_width = int(img_width * (img_bg.shape[0] / img_height))
         img_height = img_bg.shape[0]
@@ -55,7 +83,7 @@ def display_img(file):
         img_height = int(img_height * (img_bg.shape[1] / img_width))
         img_width = img_bg.shape[1]
 
-    img = cv.resize(img, (img_width, img_height), interpolation = cv.INTER_AREA) # this not working
+    img = cv.resize(img, (img_width, img_height), interpolation = cv.INTER_AREA)
 
     # Display original image on top
     dst = merge_image(img_bg, img, ((crop_width // 2) - (img.shape[1] // 2)), ((crop_height // 2) - (img.shape[0] // 2)))
@@ -81,7 +109,7 @@ def display():
     random.shuffle(filenames)
 
     for filename in filenames:
-        if filename.endswith('.MOV'):
+        if filename.endswith('.MOV') or filename.endswith('.mp4'):
             play_video(filename)
         else:
             cv.imshow("window", display_img(filename))

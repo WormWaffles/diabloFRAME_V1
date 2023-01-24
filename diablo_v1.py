@@ -21,6 +21,9 @@ def play_video(file):
 
     while cap.isOpened():
         ret, frame = cap.read() # If frame is read, ret is true
+        fps = cap.get(cv.CAP_PROP_FPS)
+        print(fps)
+        cv.VideoCapture(0 + cv.CAP_DSHOW)
 
         if not bg_made:
             blur_frame = cv.blur(frame, (frame.shape[0]//10, frame.shape[1]//10))
@@ -50,9 +53,9 @@ def play_video(file):
         frame = cv.resize(frame, (img_width, img_height), interpolation = cv.INTER_AREA)
 
         frame = merge_image(blur_frame, frame, ((crop_width // 2) - (frame.shape[1] // 2)), ((crop_height // 2) - (frame.shape[0] // 2)))
-        cv.imshow('window', frame)
-        if cv.waitKey(1) == ord('q'):
-            break
+        cv.imshow('photo_frame', frame)
+        if cv.waitKey(25) == ord('q'):
+           break
 
     return
 
@@ -101,18 +104,18 @@ def display():
     print(filenames)
 
     # Create window, set to fullscreen, and keep aspect ration of image.
-    cv.namedWindow("window", cv.WINDOW_NORMAL)
-    #cv.setWindowProperty("window", cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN)
-    cv.setWindowProperty("window", cv.WND_PROP_ASPECT_RATIO, cv.WINDOW_KEEPRATIO)
+    cv.namedWindow("photo_frame", cv.WINDOW_NORMAL)
+    #cv.setWindowProperty("photo_frame", cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN)
+    cv.setWindowProperty("photo_frame", cv.WND_PROP_ASPECT_RATIO, cv.WINDOW_KEEPRATIO)
 
     # Shuffle files in content
     random.shuffle(filenames)
 
     for filename in filenames:
-        if filename.endswith('.MOV') or filename.endswith('.mp4'):
+        if filename.endswith('.MOV') or filename.endswith('.mp4') or filename.endswith('.mov'):
             play_video(filename)
         else:
-            cv.imshow("window", display_img(filename))
+            cv.imshow("photo_frame", display_img(filename))
             if cv.waitKey(2000) == ord('q'):# TIME FOR IMAGE *************************
                 return
 

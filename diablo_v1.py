@@ -30,7 +30,6 @@ def play_video(file):
 def display_img(file):
     print(file)
     img = cv.imread(file)
-    #cv.moveWindow("window", 500, 500)
     # Blur image for background
     img_bg = cv.blur(img, (img.shape[0]//10, img.shape[1]//10))
 
@@ -48,18 +47,13 @@ def display_img(file):
 
     # Resize original to fit in new
     img_width, img_height = img.shape[1], img.shape[0]
-    #if img_width == img_height:
-        #img_width = img_bg.shape[0]
-        #img_height = img_width
-    #elif img_width > img_height:
-        #img_height = img_height * (img_bg.shape[1] // img_width)
-        #img_width = img_bg.shape[1]
-    #elif img_height > img_width:
-        #img_width = img_width * (img_bg.shape[0] // img_height)
-        #img_height = img_bg.shape[0]
 
-    img_width = img_width * (img_bg.shape[0] // img_height)
-    img_height = img_bg.shape[0]
+    if img_width // 9 > img_height // 16:
+        img_width = int(img_width * (img_bg.shape[0] / img_height))
+        img_height = img_bg.shape[0]
+    elif img_height // 16 > img_width // 9:
+        img_height = int(img_height * (img_bg.shape[1] / img_width))
+        img_width = img_bg.shape[1]
 
     img = cv.resize(img, (img_width, img_height), interpolation = cv.INTER_AREA) # this not working
 

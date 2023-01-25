@@ -128,6 +128,10 @@ def display():
     random.shuffle(filenames)
 
     for filename in filenames:
+
+        # Transition
+        
+
         if filename.endswith('.MOV') or filename.endswith('.mp4') or filename.endswith('.mov'):
             play_video(filename)
         else:

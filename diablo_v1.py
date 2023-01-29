@@ -5,14 +5,26 @@ import glob
 import random
 import time
 
+# editable vlues
+delay = 5000 # image hold time in miliseconds
+home_vid = False # home vids play on the hour
+
 def check_folder():
-    print('Looking for folder...')
+    print('Looking for CONTENT folder...')
     if os.path.exists("content"):
         print('Folder found.')
     else:
         print('Folder not found, creating...')
         os.mkdir("content")
         print('Done.')
+    print('Looking for HOME_VID folder...')
+    if home_vid:
+        if os.path.exists("home_vid"):
+            print('Folder found.')
+        else:
+            print('Folder not found, creating...')
+            os.mkdir("home_vid")
+            print('Done.')
 
 def play_video(file):
     cap = cv.VideoCapture(file)
@@ -72,6 +84,7 @@ def play_video(file):
                 break
 
 def display_img(file):
+    # read file
     print(file)
     img = cv.imread(file)
 
@@ -86,39 +99,73 @@ def display_img(file):
     img_width, img_height = img.shape[1], img.shape[0]
     img = cv.resize(img, (int((img_width / img_height) * 1080), 1080), interpolation = cv.INTER_AREA)
 
+    # if picture is really long...
+
     # Display original image on top
     del_width = img.shape[1]
     blur_frame_left = img_bg[0:1080, 0:((1920 - del_width) // 2)]
     blur_frame_right = img_bg[0:1080, (((1920 - del_width) // 2) + del_width):1920]
     dst = np.concatenate((blur_frame_left, img), axis=1)
     dst = np.concatenate((dst, blur_frame_right), axis=1)
-    #dst = merge_image(img_bg, img, ((crop_width // 2) - (img.shape[1] // 2)), ((crop_height // 2) - (img.shape[0] // 2)))
-
-    print(dst.shape[0], dst.shape[1])
 
     return dst
+
+def transition(img1, img2):
+    # Transition
+    for i in np.linspace(0,1,100):
+        alpha = i
+        beta = 1 - alpha
+        output = cv.addWeighted(img1, alpha, img2, beta, 0)
+        cv.imshow('photo_frame', output)
+        time.sleep(0.01)
+        if cv.waitKey(1) == 27:
+            break
+
+def kin_burn(img):
+    # take image and use delay to crop it every so often.
+
+    #math math math
+    print('placeholder')
 
 def display():
     # Open content folder
     path = "content"
     filenames = glob.glob(os.path.join(path, "*"))
-    print(filenames)
 
     # Create window, set to fullscreen, and keep aspect ration of image.
     cv.namedWindow("photo_frame", cv.WINDOW_NORMAL)
     #cv.setWindowProperty("photo_frame", cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN) # ** UNCOMMENT FOR FULLSCREEN **
     cv.setWindowProperty("photo_frame", cv.WND_PROP_ASPECT_RATIO, cv.WINDOW_KEEPRATIO)
+    
+    # vaid extentions
+    img_ext = {'.jpeg', '.JPG', '.jpg', '.png'}
+    vid_ext = {'mov', '.mp4', '.MOV'}
 
-    # Shuffle files in content
     random.shuffle(filenames)
-    for filename in filenames:
-        if filename.endswith('.MOV') or filename.endswith('.mp4') or filename.endswith('.mov'):
-            play_video(filename)
-        else:
-            cv.imshow("photo_frame", display_img(filename))
-            if cv.waitKey(2000) == ord('q'):# TIME FOR IMAGE *************************
-                return
+    print(filenames)
+    for i in range(len(filenames)):
+        if i < len(filenames) - 1:
+            if filenames[i].endswith(tuple(img_ext)) and filenames[i + 1].endswith(tuple(img_ext)):
+                cv.imshow('photo_frame', display_img(filenames[i]))
+                temp_img = display_img(filenames[i + 1])
+                # wait on image
+                if cv.waitKey(delay) == ord('q'):
+                    return
+                # transition
+                transition(temp_img, display_img(filenames[i]))
+            elif filenames[i].endswith(tuple(vid_ext)) and filenames[i + 1].endswith(tuple(vid_ext)):
+                play_video(filenames[i + 1])
+            elif filenames[i].endswith(tuple(img_ext)) and filenames[i + 1].endswith(tuple(vid_ext)):
+                cv.imshow('photo_frame', display_img(filenames[i]))
+                # wait for image
+                if cv.waitKey(delay) == ord('q'):
+                    return
+                play_video(filenames[i + 1])
+            else:
+                cv.imshow('photo_frame', display_img(filenames[i + 1]))
 
 check_folder()
 display()
 cv.destroyAllWindows()
+
+# p -> ken_burns -> if next = image (transition) else: play video

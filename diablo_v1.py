@@ -5,25 +5,27 @@ import glob
 import random
 import time
 
-# editable vlues
+# editable values
 delay = 5000 # image hold time in miliseconds
 home_vid = False # home vids play on the hour
+path = "content" # path to main folder
+home_path = "home_vid" # path to home video folder
 
 def check_folder():
     print('Looking for CONTENT folder...')
-    if os.path.exists("content"):
+    if os.path.exists(path):
         print('Folder found.')
     else:
         print('Folder not found, creating...')
-        os.mkdir("content")
+        os.mkdir(path)
         print('Done.')
-    print('Looking for HOME_VID folder...')
     if home_vid:
-        if os.path.exists("home_vid"):
+        print('Looking for HOME_VID folder...')
+        if os.path.exists(home_path):
             print('Folder found.')
         else:
             print('Folder not found, creating...')
-            os.mkdir("home_vid")
+            os.mkdir(home_path)
             print('Done.')
 
 def play_video(file):
@@ -99,7 +101,7 @@ def display_img(file):
     img_width, img_height = img.shape[1], img.shape[0]
     img = cv.resize(img, (int((img_width / img_height) * 1080), 1080), interpolation = cv.INTER_AREA)
 
-    # if picture is really long...
+    # If picture is really long...
 
     # Display original image on top
     del_width = img.shape[1]
@@ -121,15 +123,14 @@ def transition(img1, img2):
         if cv.waitKey(1) == 27:
             break
 
-def kin_burn(img):
-    # take image and use delay to crop it every so often.
-
-    #math math math
-    print('placeholder')
+def ken_burn(img):
+    # Take image and use delay to crop it every so often.
+    cv.imshow('photo_frame', img)
+    if cv.waitKey(delay) == ord('q'):
+        return
 
 def display():
     # Open content folder
-    path = "content"
     filenames = glob.glob(os.path.join(path, "*"))
 
     # Create window, set to fullscreen, and keep aspect ration of image.
@@ -139,30 +140,36 @@ def display():
     
     # vaid extentions
     img_ext = {'.jpeg', '.JPG', '.jpg', '.png'}
-    vid_ext = {'mov', '.mp4', '.MOV'}
+    vid_ext = {'mov', '.mp4', '.MOV'} # kinda not using this
 
+    # Print filenames, make iterator, and shuffle
     random.shuffle(filenames)
     print(filenames)
-    for i in range(len(filenames)):
-        if i < len(filenames) - 1:
-            if filenames[i].endswith(tuple(img_ext)) and filenames[i + 1].endswith(tuple(img_ext)):
-                cv.imshow('photo_frame', display_img(filenames[i]))
-                temp_img = display_img(filenames[i + 1])
-                # wait on image
-                if cv.waitKey(delay) == ord('q'):
-                    return
-                # transition
-                transition(temp_img, display_img(filenames[i]))
-            elif filenames[i].endswith(tuple(vid_ext)) and filenames[i + 1].endswith(tuple(vid_ext)):
-                play_video(filenames[i + 1])
-            elif filenames[i].endswith(tuple(img_ext)) and filenames[i + 1].endswith(tuple(vid_ext)):
-                cv.imshow('photo_frame', display_img(filenames[i]))
-                # wait for image
-                if cv.waitKey(delay) == ord('q'):
-                    return
-                play_video(filenames[i + 1])
+    filenames = iter(filenames)
+
+    file = next(filenames)
+    img = display_img(file)
+    while True:
+        try:
+            if file.endswith(tuple(img_ext)):
+                ken_burn(img)
+                next_file = next(filenames)
+                if next_file.endswith(tuple(img_ext)):
+                    next_img = display_img(next_file)
+                    transition(next_img, img) # can edit this to make better
+                    file = next_file
+                    img = next_img
+                else:
+                    play_video(next_file)
+                    file = next(filenames)
+                    if file.endswith(tuple(img_ext)):
+                        img = display_img(file)
             else:
-                cv.imshow('photo_frame', display_img(filenames[i + 1]))
+                play_video(file)
+                file = next(filenames)
+        except:
+            print('END OF LIST')
+            break
 
 check_folder()
 display()

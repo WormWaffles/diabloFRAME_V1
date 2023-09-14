@@ -27,12 +27,12 @@ Before running the Photo and Video Slideshow Program, make sure you have the fol
 1. Clone or download the repository to your local machine.
 
    ```shell
-   git clone https://github.com/WormWaffles/DiabloFRAME_V1
+   git clone https://github.com/WormWaffles/diabloFRAME_V1
    ```
 2. Navigate to the project directory.
-  ```shell
-  cd diabloFRAME_V1
-  ```
+   ```shell
+   cd diabloFRAME_V1
+   ```
 
 ## Usage
 1. Customize the program settings in the script, including:

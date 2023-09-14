@@ -40,7 +40,7 @@ Before running the Photo and Video Slideshow Program, make sure you have the fol
 - Path to the main folder (path)
 - Whether home videos play on the hour (home_vid)
 2. Run the program using Python.
-  ```shell
-  python main.py
-  ```
+   ```shell
+   python main.py
+   ```
 3. The program will display a slideshow of images and videos based on your settings. Use 'q' to quit the program.
